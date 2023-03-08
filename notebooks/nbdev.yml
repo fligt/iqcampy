@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "iqcampy"
+  site-url: "https://fligt.github.io/iqcampy"
+  description: "Read and visualize Specim IQcam hyperspectral images"
+  repo-branch: master
+  repo-url: "https://github.com/fligt/iqcampy"
