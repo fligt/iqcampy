@@ -5,12 +5,8 @@ Welcome to iqcampy
 
 Our lab, the Rijkserfgoedlaboratorium in Amsterdam, recently acquired a
 light weight, mobile and user friendly Specim IQcam spectral camera for
-the investigation of artworks. The open source Python package `iqcampy`
-is developed in the open to learn how to read, visualize and interpret
-the spectral image data for this camera.
-
-We hope to release an installable package soon. If you are interested,
-and cannot wait, take a look at the documentation and Jupyter notebooks
-in his repository.
+the investigation of artworks. This open source Python package `iqcampy`
+is developed in out the open to learn together how to read, visualize
+and interpret the spectral image data for this camera.
 
 Let’s dive in!!
