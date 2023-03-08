@@ -3,7 +3,7 @@
 # %% auto 0
 __all__ = ['download', 'filetree', 'read_darkref', 'read_whiteref', 'read_capture', 'read_reflectance', 'compute_reflectance']
 
-# %% ../notebooks/00_reading-iqcam-data.ipynb 27
+# %% ../notebooks/00_reading-iqcam-data.ipynb 26
 import os 
 import wget
 import shutil 
@@ -18,7 +18,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# %% ../notebooks/00_reading-iqcam-data.ipynb 28
+# %% ../notebooks/00_reading-iqcam-data.ipynb 27
 def download(): 
     '''Download Specim IQcam demo dataset zipfile and extract its contents. '''
     
