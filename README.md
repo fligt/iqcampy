@@ -13,4 +13,4 @@ We hope to release an installable package soon. If you are interested,
 and cannot wait, take a look at the documentation and Jupyter notebooks
 in his repository.
 
-Let’s dive in!
+Let’s dive in!!
