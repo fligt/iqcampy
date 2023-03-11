@@ -3,10 +3,11 @@
 # %% auto 0
 __all__ = ['download', 'filetree', 'read_darkref', 'read_whiteref', 'read_capture', 'read_reflectance', 'compute_reflectance']
 
-# %% ../notebooks/10_reading-iqcam-data.ipynb 25
+# %% ../notebooks/10_reading-iqcam-data.ipynb 26
 import os 
-import wget
 import shutil 
+import requests
+from tqdm import tqdm 
 
 from treelib import Tree
 from os import walk 
@@ -18,7 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-# %% ../notebooks/10_reading-iqcam-data.ipynb 26
+# %% ../notebooks/10_reading-iqcam-data.ipynb 27
 def download(): 
     '''Download Specim IQcam demo dataset zipfile and extract its contents. '''
     
@@ -39,21 +40,34 @@ def download():
     url = f'https://f002.backblazeb2.com/file/iqcampy-demo/{zip_file}' 
     
     if os.path.exists(zip_file): 
-        print(f'Found existing zipfile: {zip_file} (skipping download)')
-    else: 
-        print('Downloading 137 MB. Please wait a a few minutes...')
-        wget.download(url, bar=_bar_custom)   
-        print('Ready!                               ') 
+        print(f'(1/2) Found existing zipfile: {zip_file} (skipping download)')
         
-    # extracting zipfile 
-    print('Extracting zip file...')
+    else: 
+        print('(1/2) Please wait while downloading...')
+
+        r = requests.get(url, stream=True)
+        total = int(r.headers.get('content-length', 0))
+        
+        #print(f'Downloading {total//1024} MB. Please wait...')
+
+        # Can also replace 'file' with a io.BytesIO object
+        with open(zip_file, 'wb') as fh, tqdm(
+            desc=zip_file,
+            total=total,
+            unit='iB',
+            unit_scale=True,
+            unit_divisor=1024,
+            ) as bar:
+                for data in r.iter_content(chunk_size=1024):
+                    size = fh.write(data)
+                    bar.update(size)
+
+    #extracting zipfile 
+    print('(2/2) Extracting zip file...')
     shutil.unpack_archive(zip_file)
     print('Ready!')
         
     return zip_file
-
-def _bar_custom(current, total, width=80):
-    print(f'Downloading: {(100 * current) // total}% of {total // 1e6} MB', end='\r')
     
 
     
