@@ -1,0 +1,51 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome to iqcampy",
+    "section": "",
+    "text": "Our lab, the Rijkserfgoedlaboratorium in Amsterdam, recently acquired a light weight, mobile and user friendly Specim IQ hyperspectral camera for the investigation of artworks. This open source Python package iqcampy is developed in out the open to learn together how to read, visualize and interpret the spectral image data for this camera.\nLet’s dive in!!"
+  },
+  {
+    "objectID": "reading-iqcam-data.html",
+    "href": "reading-iqcam-data.html",
+    "title": "Reading your IQcam data",
+    "section": "",
+    "text": "The Specim IQ hyperspectral camera (IQcam) saves its raw and computed data in an open data format. Very nice! The iqcampy package is designed to help you to explore the data. In order to learn about the way the IQcam data is formatted and can be read you can download a demo dataset iqcam_2021-02-03_005_4x-aquarelblauw-FL-01.zip.\nImport the download() and filetree() functions. Running download() will: 1) create a subdirectory downloads/, 2) change our working directory to this folder, 3) download a zip file with a dataset, and 4) extract the contents of the zip file.\nWe can now explore the complete contents of the dataset with the filetree() function.\nA closer look at this file tree makes clear that the measured data (in the capture folder) consists three basic datasets: a dark reference, a white reference, and the actual iqcam capture:\nEach dataset consists of .hdr text file with some meta data and a .raw file with the numerical values.\nUse the functions read_darkref(), read_whiteref() and read_capture() to read these ‘raw’ datasets.\nThese functions return numpy arrays and additional meta data in the well-known ENVI format for hyper spectral images.\nWe can subsequently compute the reflectance spectral data cube with the compute_reflectance() function. Mathematically, the reflectance \\(R\\) is calculated form the absolute intensity \\(I\\) by subtracting the dark reference spectrum \\(D\\) and dividing by the white reference spectrum \\(W\\).\n\\[ R = \\frac{I - D}{W - D} \\]\nThis data cube is consists of a stack of 204 square images of 512$$512 pixels at 204 wavelength channels.\nHere are the wavelengths as listed in the ENVI header .hdr file.\nA first test to see if we are doing fine is to compute a pseudo RGB image from the default bands = {70,53,19} in the ENVI meta data, and plot the image."
+  },
+  {
+    "objectID": "reading-iqcam-data.html#functions",
+    "href": "reading-iqcam-data.html#functions",
+    "title": "Reading your IQcam data",
+    "section": "FUNCTIONS",
+    "text": "FUNCTIONS\n\nsource\n\ncompute_reflectance\n\n compute_reflectance (capture_cube, dark_spectrum, white_spectrum)\n\nCompute spectral reflectance cube from raw data.\nReturns: reflectance_cube\n\nsource\n\n\nread_reflectance\n\n read_reflectance ()\n\nRead precomputed computed reflectance header, cube data and rgb image.\nReturns: meta, nms, reflectance_cube, rgb_img\n\nsource\n\n\nread_capture\n\n read_capture ()\n\nRead cube capture header and data.\nReturns: meta, nms, capture_cube\n\nsource\n\n\nread_whiteref\n\n read_whiteref ()\n\nRead WHITEREF header and data.\nReturns: meta, nms, white_spectrum\n\nsource\n\n\nread_darkref\n\n read_darkref ()\n\nRead DARKREF header and data.\nReturns: meta, nms, dark_spectrum\n\nsource\n\n\nfiletree\n\n filetree (zip_file, include_files=True, force_absolute_ids=True,\n           show=True)\n\nPrints a file tree with the contents of the extracted zip_file.\n\nsource\n\n\ndownload\n\n download ()\n\nDownload Specim IQcam demo dataset zipfile and extract its contents."
+  },
+  {
+    "objectID": "getting-started.html",
+    "href": "getting-started.html",
+    "title": "Getting started",
+    "section": "",
+    "text": "Before you can install and use the iqcampy package you need to prepare your computer by setting up a python environment in which you can execute python code and install additional python packages. It is recommended to do this by downloading (581MB) and installing Anaconda Distribution. For installation instructions on Windows, Mac and Linux see: https://docs.anaconda.com/anaconda/install/\nIncluded are many powerful data science python packages, Jupyter notebooks and the python package manager program pip. You are now ready to install additional packages such as iqcampy."
+  },
+  {
+    "objectID": "getting-started.html#installing-iqcampy",
+    "href": "getting-started.html#installing-iqcampy",
+    "title": "Getting started",
+    "section": "Installing iqcampy",
+    "text": "Installing iqcampy\nTake a look at the Python Package Index at https://pypi.org/ and search for the python package that you need. In our case iqcampy. Open a terminal window (in the Windows start menu called Anaconda Prompt) and type the installation command and press enter:\npip install iqcampy \nThis command starts the python package manager program pip and tells it to fetch the package from the Python Package Index and install on your computer. You are now ready to run the code examples in a Jupyter notebook.\nIf at some point in the future you would like to upgrade iqcampy to a newer version, execute the pip command with the upgrade -U flag:\npip install -U iqcampy"
+  },
+  {
+    "objectID": "getting-started.html#run-a-jupyter-notebook",
+    "href": "getting-started.html#run-a-jupyter-notebook",
+    "title": "Getting started",
+    "section": "Run a Jupyter notebook",
+    "text": "Run a Jupyter notebook\nJupyter notebooks are files with the filename extension .ipynb. In the old days they were called interactive python notebooks, hence the extension. You can type and execute python code, and see the results, in these notebooks. Interaction with these notebooks works via a modern web browser such as Firefox or Chrome. I am not sure if other web browsers also work. To create and run a notebook you need to start a Jupyter Notebook server. On windows this is done by clicking on the Jupyter Notebook item in the start menu. Alternatively, you can start a notebook server by typing this command in a terminal:\njupyter notebook\nThe Jupyter Notebook server should open in your browser on the dashboard page. Although we see stuff appearing in the web browser, all processes are happening locally on your computer. Now you can select the folder you want to work in and create a new notebook with the new button."
+  },
+  {
+    "objectID": "getting-started.html#execute-a-code-cell",
+    "href": "getting-started.html#execute-a-code-cell",
+    "title": "Getting started",
+    "section": "Execute a code cell",
+    "text": "Execute a code cell\nThe Jupyter ecosystem has expanded rapidly in the last years. I find this a bit confusing. So let’s stick with the classic python Jupyter Notebook for now.\nJupyter notebooks contain two types of cells: code cells and markdown cells. Try by typing 1 + 1 in a code cell. You can execute the code cell by simultaneously pressing Shift and Enter. More information is found in the help menu and on-line: https://jupyter.org/try.\nThat is it! You can now move on to the next sections and try the code examples."
+  }
+]
