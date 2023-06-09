@@ -38,6 +38,7 @@ def download():
     
     zip_file = 'iqcam_2021-02-03_005_4x-aquarelblauw-FL-01.zip' 
     url = f'https://f002.backblazeb2.com/file/iqcampy-demo/{zip_file}' 
+    data_path = re.sub('\.zip$', '', zip_file) # remove extension .zip 
     
     if os.path.exists(zip_file): 
         print(f'(1/2) Found existing zipfile: {zip_file} (skipping download)')
@@ -67,21 +68,18 @@ def download():
     shutil.unpack_archive(zip_file)
     print('Ready!')
         
-    return zip_file
+    return data_path
     
 
     
-def filetree(zip_file, include_files=True, force_absolute_ids=True, show=True):
+def filetree(data_path, include_files=True, force_absolute_ids=True, show=True):
+    """Prints a file tree with the contents of the `data_path` folder. 
     
-    """Prints a file tree with the contents of the extracted `zip_file`. 
-    
-    """
-    
-    start_path = re.sub('\.zip$', '', zip_file) # remove extension .zip
+    """ 
     
     tree = Tree()
     first = True
-    for root, _, files in walk(start_path):
+    for root, _, files in walk(data_path):
         p_root = Path(root)
         if first:
             parent_id = None
@@ -105,15 +103,15 @@ def filetree(zip_file, include_files=True, force_absolute_ids=True, show=True):
 
 
 
-def read_darkref(): 
+def read_darkref(data_path): 
     '''Read DARKREF header and data. 
     
     Returns: meta, nms, dark_spectrum
     '''
     
     # darkref filepaths      
-    darkref_hdr = glob.glob('**/DARKREF*.hdr', recursive=True)[0]
-    darkref_raw = glob.glob('**/DARKREF*.raw', recursive=True)[0] 
+    darkref_hdr = glob.glob(f'{data_path}/**/DARKREF*.hdr', recursive=True)[0]
+    darkref_raw = glob.glob(f'{data_path}/**/DARKREF*.raw', recursive=True)[0] 
 
     #darkref data
     with open(darkref_hdr) as fh: 
@@ -140,15 +138,15 @@ def read_darkref():
 
 
 
-def read_whiteref(): 
+def read_whiteref(data_path): 
     '''Read WHITEREF header and data. 
     
     Returns: meta, nms, white_spectrum
     '''
     
     # whiteref filepaths      
-    whiteref_hdr = glob.glob('**/WHITEREF*.hdr', recursive=True)[0]
-    whiteref_raw = glob.glob('**/WHITEREF*.raw', recursive=True)[0] 
+    whiteref_hdr = glob.glob(f'{data_path}/**/WHITEREF*.hdr', recursive=True)[0]
+    whiteref_raw = glob.glob(f'{data_path}/**/WHITEREF*.raw', recursive=True)[0] 
 
     #darkref data
     with open(whiteref_hdr) as fh: 
@@ -172,15 +170,15 @@ def read_whiteref():
     return meta, nms, white_spectrum 
 
 
-def read_capture(): 
+def read_capture(data_path): 
     '''Read cube capture header and data. 
     
     Returns: meta, nms, capture_cube
     '''
     
     # capture filepaths      
-    capture_hdr = glob.glob('**/iqcam*.hdr', recursive=True)[0]
-    capture_raw = glob.glob('**/iqcam*.raw', recursive=True)[0] 
+    capture_hdr = glob.glob(f'{data_path}/**/iqcam*.hdr', recursive=True)[0]
+    capture_raw = glob.glob(f'{data_path}/**/iqcam*.raw', recursive=True)[0] 
 
     #darkref data
     with open(capture_hdr) as fh: 
@@ -206,16 +204,16 @@ def read_capture():
 
 
 
-def read_reflectance(): 
+def read_reflectance(data_path): 
     '''Read precomputed computed reflectance header, cube data and rgb image. 
     
     Returns: meta, nms, reflectance_cube, rgb_img
     '''
     
     # reflectance filepaths (assuming only one extracted zip file)    
-    reflectance_hdr = glob.glob('**/REFLECTANCE*.hdr', recursive=True)[0]
-    reflectance_dat = glob.glob('**/REFLECTANCE*.dat', recursive=True)[0] 
-    png = glob.glob('**/REFLECTANCE*.png', recursive=True)[0]
+    reflectance_hdr = glob.glob(f'{data_path}/**/REFLECTANCE*.hdr', recursive=True)[0]
+    reflectance_dat = glob.glob(f'{data_path}/**/REFLECTANCE*.dat', recursive=True)[0] 
+    png = glob.glob(f'{data_path}/**/REFLECTANCE*.png', recursive=True)[0]
 
     #reflectance data
     with open(reflectance_hdr) as fh: 
