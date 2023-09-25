@@ -9,4 +9,4 @@ for the investigation of artworks. This open source Python package
 `iqcampy` is developed in out the open to learn together how to read,
 visualize and interpret the spectral image data for this camera.
 
-Let’s dive in!!
+Let’s dive in!
