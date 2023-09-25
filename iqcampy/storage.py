@@ -48,8 +48,6 @@ def download():
 
         r = requests.get(url, stream=True)
         total = int(r.headers.get('content-length', 0))
-        
-        #print(f'Downloading {total//1024} MB. Please wait...')
 
         # Can also replace 'file' with a io.BytesIO object
         with open(zip_file, 'wb') as fh, tqdm(
