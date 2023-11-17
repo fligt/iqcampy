@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en"><head>
+
+<meta charset="utf-8">
+<meta name="generator" content="quarto-1.3.450">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+
+<meta name="description" content="Taking a first look at the Specim IQ hyper spectral image file format">
+
+<title>iqcampy - Reading your IQcam data</title>
+<style>
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+div.columns{display: flex; gap: min(4vw, 1.5em);}
+div.column{flex: auto; overflow-x: auto;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+ul.task-list li input[type="checkbox"] {
+  width: 0.8em;
+  margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
+  vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+</style>
+
+
+<script src="site_libs/quarto-nav/quarto-nav.js"></script>
+<script src="site_libs/quarto-nav/headroom.min.js"></script>
+<script src="site_libs/clipboard/clipboard.min.js"></script>
+<script src="site_libs/quarto-search/autocomplete.umd.js"></script>
+<script src="site_libs/quarto-search/fuse.min.js"></script>
+<script src="site_libs/quarto-search/quarto-search.js"></script>
+<meta name="quarto:offset" content="./">
+<link href="./absorbance.html" rel="next">
+<link href="./getting-started.html" rel="prev">
+<script src="site_libs/quarto-html/quarto.js"></script>
+<script src="site_libs/quarto-html/popper.min.js"></script>
+<script src="site_libs/quarto-html/tippy.umd.min.js"></script>
+<script src="site_libs/quarto-html/anchor.min.js"></script>
+<link href="site_libs/quarto-html/tippy.css" rel="stylesheet">
+<link href="site_libs/quarto-html/quarto-syntax-highlighting.css" rel="stylesheet" id="quarto-text-highlighting-styles">
+<script src="site_libs/bootstrap/bootstrap.min.js"></script>
+<link href="site_libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
+<link href="site_libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
+<script id="quarto-search-options" type="application/json">{
+  "location": "navbar",
+  "copy-button": false,
+  "collapse-after": 3,
+  "panel-placement": "end",
+  "type": "overlay",
+  "limit": 20,
+  "language": {
+    "search-no-results-text": "No results",
+    "search-matching-documents-text": "matching documents",
+    "search-copy-link-title": "Copy link to search",
+    "search-hide-matches-text": "Hide additional matches",
+    "search-more-match-text": "more match in this document",
+    "search-more-matches-text": "more matches in this document",
+    "search-clear-button-title": "Clear",
+    "search-detached-cancel-button-title": "Cancel",
+    "search-submit-button-title": "Submit",
+    "search-label": "Search"
+  }
+}</script>
+
+  <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="styles.css">
+<meta property="og:title" content="iqcampy - Reading your IQcam data">
+<meta property="og:description" content="Taking a first look at the Specim IQ hyper spectral image file format">
+<meta property="og:image" content="https://fligt.github.io/iqcampy/10_reading-iqcam-data_files/figure-html/cell-13-output-1.png">
+<meta property="og:site-name" content="iqcampy">
+<meta property="og:image:height" content="603">
+<meta property="og:image:width" content="596">
+</head>
+
+<body class="nav-sidebar floating nav-fixed">
+
+<div id="quarto-search-results"></div>
+  <header id="quarto-header" class="headroom fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark ">
+      <div class="navbar-container container-fluid">
+      <div class="navbar-brand-container">
+    <a class="navbar-brand" href="./index.html">
+    <span class="navbar-title">iqcampy</span>
+    </a>
+  </div>
+            <div id="quarto-search" class="" title="Search"></div>
+          <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+  <span class="navbar-toggler-icon"></span>
+</button>
+          <div class="collapse navbar-collapse" id="navbarCollapse">
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
+  <li class="nav-item compact">
+    <a class="nav-link" href="https://github.com/fligt/iqcampy" rel="" target=""><i class="bi bi-github" role="img">
+</i> 
+ <span class="menu-text"></span></a>
+  </li>  
+</ul>
+            <div class="quarto-navbar-tools">
+</div>
+          </div> <!-- /navcollapse -->
+      </div> <!-- /container-fluid -->
+    </nav>
+  <nav class="quarto-secondary-nav">
+    <div class="container-fluid d-flex">
+      <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
+        <i class="bi bi-layout-text-sidebar-reverse"></i>
+      </button>
+      <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./reading-iqcam-data.html">Reading your IQcam data</a></li></ol></nav>
+      <a class="flex-grow-1" role="button" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
+      </a>
+    </div>
+  </nav>
+</header>
+<!-- content -->
+<div id="quarto-content" class="quarto-container page-columns page-rows-contents page-layout-article page-navbar">
+<!-- sidebar -->
+  <nav id="quarto-sidebar" class="sidebar collapse collapse-horizontal sidebar-navigation floating overflow-auto">
+    <div class="sidebar-menu-container"> 
+    <ul class="list-unstyled mt-1">
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./index.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Welcome to iqcampy</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./getting-started.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">Getting started with Python</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./reading-iqcam-data.html" class="sidebar-item-text sidebar-link active">
+ <span class="menu-text">Reading your IQcam data</span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
+  <a href="./absorbance.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text">From reflectance to absorbance</span></a>
+  </div>
+</li>
+    </ul>
+    </div>
+</nav>
+<div id="quarto-sidebar-glass" data-bs-toggle="collapse" data-bs-target="#quarto-sidebar,#quarto-sidebar-glass"></div>
+<!-- margin-sidebar -->
+    <div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+        <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">On this page</h2>
+   
+  <ul>
+  <li><a href="#functions" id="toc-functions" class="nav-link active" data-scroll-target="#functions">FUNCTIONS</a>
+  <ul class="collapse">
+  <li><a href="#compute_reflectance" id="toc-compute_reflectance" class="nav-link" data-scroll-target="#compute_reflectance">compute_reflectance</a></li>
+  <li><a href="#read_reflectance" id="toc-read_reflectance" class="nav-link" data-scroll-target="#read_reflectance">read_reflectance</a></li>
+  <li><a href="#read_capture" id="toc-read_capture" class="nav-link" data-scroll-target="#read_capture">read_capture</a></li>
+  <li><a href="#read_whiteref" id="toc-read_whiteref" class="nav-link" data-scroll-target="#read_whiteref">read_whiteref</a></li>
+  <li><a href="#read_darkref" id="toc-read_darkref" class="nav-link" data-scroll-target="#read_darkref">read_darkref</a></li>
+  <li><a href="#filetree" id="toc-filetree" class="nav-link" data-scroll-target="#filetree">filetree</a></li>
+  <li><a href="#download" id="toc-download" class="nav-link" data-scroll-target="#download">download</a></li>
+  </ul></li>
+  </ul>
+<div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/fligt/iqcampy/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
+    </div>
+<!-- main -->
+<main class="content" id="quarto-document-content">
+
+<header id="title-block-header" class="quarto-title-block default">
+<div class="quarto-title">
+<h1 class="title">Reading your IQcam data</h1>
+</div>
+
+<div>
+  <div class="description">
+    Taking a first look at the Specim IQ hyper spectral image file format
+  </div>
+</div>
+
+
+<div class="quarto-title-meta">
+
+    
+  
+    
+  </div>
+  
+
+</header>
+
+<!-- WARNING: THIS FILE WAS AUTOGENERATED! DO NOT EDIT! -->
+<p>The Specim IQ hyperspectral camera (IQcam) saves its raw and computed data in an open data format. Very nice! The <code>iqcampy</code> package is designed to help you to explore the data. In order to learn about the way the IQcam data is formatted and can be read you can download a demo dataset <code>iqcam_2021-02-03_005_4x-aquarelblauw-FL-01.zip</code>.</p>
+<p>Import the <code>download()</code> and <code>filetree()</code> functions. Running <code>download()</code> will: 1) create a subdirectory <code>downloads/</code>, 2) change our working directory to this folder, 3) download a zip file with a dataset, and 4) extract the contents of the zip file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> iqcampy <span class="im">import</span> download, filetree</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>data_path <span class="op">=</span> download()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Current working directory: "downloads"
+(1/2) Found existing zipfile: iqcam_2021-02-03_005_4x-aquarelblauw-FL-01.zip (skipping download)
+(2/2) Extracting zip file...
+Ready!</code></pre>
+</div>
+</div>
+<p>We can now explore the complete contents of the dataset with the <code>filetree()</code> function.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>filetree(data_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>iqcam_2021-02-03_005_4x-aquarelblauw-FL-01/
+├── .validated
+├── capture/
+│   ├── DARKREF_iqcam_2021-02-03_005.hdr
+│   ├── DARKREF_iqcam_2021-02-03_005.raw
+│   ├── WHITEREF_iqcam_2021-02-03_005.hdr
+│   ├── WHITEREF_iqcam_2021-02-03_005.raw
+│   ├── iqcam_2021-02-03_005.hdr
+│   └── iqcam_2021-02-03_005.raw
+├── iqcam_2021-02-03_005.png
+├── manifest.xml
+├── metadata/
+│   └── iqcam_2021-02-03_005.xml
+└── results/
+    ├── REFLECTANCE_iqcam_2021-02-03_005.dat
+    ├── REFLECTANCE_iqcam_2021-02-03_005.hdr
+    ├── REFLECTANCE_iqcam_2021-02-03_005.png
+    ├── RGBBACKGROUND_iqcam_2021-02-03_005.png
+    ├── RGBSCENE_iqcam_2021-02-03_005.png
+    └── RGBVIEWFINDER_iqcam_2021-02-03_005.png
+</code></pre>
+</div>
+</div>
+<p>A closer look at this file tree makes clear that the measured data (in the <code>capture</code> folder) consists three basic datasets: a dark reference, a white reference, and the actual iqcam capture:</p>
+<pre><code>capture/
+├── DARKREF_iqcam_2021-02-03_005.hdr
+├── DARKREF_iqcam_2021-02-03_005.raw
+├── WHITEREF_iqcam_2021-02-03_005.hdr
+├── WHITEREF_iqcam_2021-02-03_005.raw
+├── iqcam_2021-02-03_005.hdr
+└── iqcam_2021-02-03_005.raw </code></pre>
+<p>Each dataset consists of <code>.hdr</code> text file with some meta data and a <code>.raw</code> file with the numerical values.</p>
+<p>Use the functions <code>read_darkref()</code>, <code>read_whiteref()</code> and <code>read_capture()</code> to read these ‘raw’ datasets.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> iqcampy <span class="im">import</span> read_darkref, read_whiteref, read_capture, compute_reflectance</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dark_meta, nms, dark_spectrum <span class="op">=</span> read_darkref(data_path)</span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>white_meta, nms, white_spectrum <span class="op">=</span> read_whiteref(data_path)</span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>capture_meta, nms, capture_cube <span class="op">=</span> read_capture(data_path)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>These functions return numpy arrays and additional meta data in the well-known ENVI format for hyper spectral images.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(capture_meta)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>ENVI
+description = {Data recorded with Specim IQ}
+samples = 512
+lines = 512
+bands = 204
+header offset = 0
+file type = ENVI
+data type = 12
+interleave = BIL
+sensor type = SPECIM IQ
+byte order = 0
+default bands = {70,53,19}
+latitude = 0.00000000
+longitude = 0.00000000
+acquisition date = 03-02-2021
+errors = none
+binning = {1,1}
+tint = 98
+fps = 10.2041
+</code></pre>
+</div>
+</div>
+<p>We can subsequently compute the reflectance spectral data cube with the <code>compute_reflectance()</code> function. Mathematically, the reflectance <span class="math inline">\(R\)</span> is calculated form the absolute intensity <span class="math inline">\(I\)</span> by subtracting the dark reference spectrum <span class="math inline">\(D\)</span> and dividing by the white reference spectrum <span class="math inline">\(W\)</span>.</p>
+<p><span class="math display">\[ R = \frac{I - D}{W - D} \]</span></p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>reflectance_cube <span class="op">=</span> compute_reflectance(capture_cube, dark_spectrum, white_spectrum)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>This data cube is consists of a stack of 204 square images of 512 x 512 pixels at 204 wavelength channels.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>reflectance_cube.shape</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<pre><code>(512, 512, 204)</code></pre>
+</div>
+</div>
+<p>Here are the wavelengths as listed in the ENVI header <code>.hdr</code> file.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 204 wavelenghths (nm)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(nms)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[ 397.32  400.2   403.09  405.97  408.85  411.74  414.63  417.52  420.4
+  423.29  426.19  429.08  431.97  434.87  437.76  440.66  443.56  446.45
+  449.35  452.25  455.16  458.06  460.96  463.87  466.77  469.68  472.59
+  475.5   478.41  481.32  484.23  487.14  490.06  492.97  495.89  498.8
+  501.72  504.64  507.56  510.48  513.4   516.33  519.25  522.18  525.1
+  528.03  530.96  533.89  536.82  539.75  542.68  545.62  548.55  551.49
+  554.43  557.36  560.3   563.24  566.18  569.12  572.07  575.01  577.96
+  580.9   583.85  586.8   589.75  592.7   595.65  598.6   601.55  604.51
+  607.46  610.42  613.38  616.34  619.3   622.26  625.22  628.18  631.15
+  634.11  637.08  640.04  643.01  645.98  648.95  651.92  654.89  657.87
+  660.84  663.81  666.79  669.77  672.75  675.73  678.71  681.69  684.67
+  687.65  690.64  693.62  696.61  699.6   702.58  705.57  708.57  711.56
+  714.55  717.54  720.54  723.53  726.53  729.53  732.53  735.53  738.53
+  741.53  744.53  747.54  750.54  753.55  756.56  759.56  762.57  765.58
+  768.6   771.61  774.62  777.64  780.65  783.67  786.68  789.7   792.72
+  795.74  798.77  801.79  804.81  807.84  810.86  813.89  816.92  819.95
+  822.98  826.01  829.04  832.07  835.11  838.14  841.18  844.22  847.25
+  850.29  853.33  856.37  859.42  862.46  865.5   868.55  871.6   874.64
+  877.69  880.74  883.79  886.84  889.9   892.95  896.01  899.06  902.12
+  905.18  908.24  911.3   914.36  917.42  920.48  923.55  926.61  929.68
+  932.74  935.81  938.88  941.95  945.02  948.1   951.17  954.24  957.32
+  960.4   963.47  966.55  969.63  972.71  975.79  978.88  981.96  985.05
+  988.13  991.22  994.31  997.4  1000.49 1003.58]</code></pre>
+</div>
+</div>
+<p>A first test to see if we are doing fine is to compute a pseudo RGB image from the <code>default bands = {70,53,19}</code> in the ENVI meta data, and plot the image.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>pseudo_rgb <span class="op">=</span> reflectance_cube[:,:, [<span class="dv">70</span>, <span class="dv">53</span>, <span class="dv">19</span>]] <span class="co"># red, green, blue</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> matplotlib.pyplot <span class="im">as</span> plt</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode python code-with-copy"><code class="sourceCode python"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>fig, ax <span class="op">=</span> plt.subplots(figsize<span class="op">=</span>[<span class="dv">7</span>, <span class="dv">7</span>])</span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>ax.imshow(pseudo_rgb <span class="op">/</span> pseudo_rgb.<span class="bu">max</span>()) <span class="co"># avoid clipping </span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>ax.set_title(<span class="st">'pseudo RGB'</span>)<span class="op">;</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-display">
+<p><img src="10_reading-iqcam-data_files/figure-html/cell-13-output-1.png" class="img-fluid"></p>
+</div>
+</div>
+<section id="functions" class="level2">
+<h2 class="anchored" data-anchor-id="functions">FUNCTIONS</h2>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L245" target="_blank" style="float:right; font-size:smaller">source</a></p>
+<section id="compute_reflectance" class="level3">
+<h3 class="anchored" data-anchor-id="compute_reflectance">compute_reflectance</h3>
+<blockquote class="blockquote">
+<pre><code> compute_reflectance (capture_cube, dark_spectrum, white_spectrum)</code></pre>
+</blockquote>
+<p>Compute spectral reflectance cube from raw data.</p>
+<p>Returns: reflectance_cube</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L210" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="read_reflectance" class="level3">
+<h3 class="anchored" data-anchor-id="read_reflectance">read_reflectance</h3>
+<blockquote class="blockquote">
+<pre><code> read_reflectance (data_path)</code></pre>
+</blockquote>
+<p>Read precomputed computed reflectance header, cube data and rgb image.</p>
+<p>Returns: meta, nms, reflectance_cube, rgb_img</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L176" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="read_capture" class="level3">
+<h3 class="anchored" data-anchor-id="read_capture">read_capture</h3>
+<blockquote class="blockquote">
+<pre><code> read_capture (data_path)</code></pre>
+</blockquote>
+<p>Read cube capture header and data.</p>
+<p>Returns: meta, nms, capture_cube</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L144" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="read_whiteref" class="level3">
+<h3 class="anchored" data-anchor-id="read_whiteref">read_whiteref</h3>
+<blockquote class="blockquote">
+<pre><code> read_whiteref (data_path)</code></pre>
+</blockquote>
+<p>Read WHITEREF header and data.</p>
+<p>Returns: meta, nms, white_spectrum</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L109" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="read_darkref" class="level3">
+<h3 class="anchored" data-anchor-id="read_darkref">read_darkref</h3>
+<blockquote class="blockquote">
+<pre><code> read_darkref (data_path)</code></pre>
+</blockquote>
+<p>Read DARKREF header and data.</p>
+<p>Returns: meta, nms, dark_spectrum</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L73" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="filetree" class="level3">
+<h3 class="anchored" data-anchor-id="filetree">filetree</h3>
+<blockquote class="blockquote">
+<pre><code> filetree (data_path, include_files=True, force_absolute_ids=True,
+           show=True)</code></pre>
+</blockquote>
+<p>Prints a file tree with the contents of the <code>data_path</code> folder.</p>
+<hr>
+<p><a href="https://github.com/fligt/iqcampy/blob/master/iqcampy/storage.py#L23" target="_blank" style="float:right; font-size:smaller">source</a></p>
+</section>
+<section id="download" class="level3">
+<h3 class="anchored" data-anchor-id="download">download</h3>
+<blockquote class="blockquote">
+<pre><code> download ()</code></pre>
+</blockquote>
+<p>Download Specim IQcam demo dataset zipfile and extract its contents.</p>
+
+
+</section>
+</section>
+
+</main> <!-- /main -->
+<script id="quarto-html-after-body" type="application/javascript">
+window.document.addEventListener("DOMContentLoaded", function (event) {
+  const toggleBodyColorMode = (bsSheetEl) => {
+    const mode = bsSheetEl.getAttribute("data-mode");
+    const bodyEl = window.document.querySelector("body");
+    if (mode === "dark") {
+      bodyEl.classList.add("quarto-dark");
+      bodyEl.classList.remove("quarto-light");
+    } else {
+      bodyEl.classList.add("quarto-light");
+      bodyEl.classList.remove("quarto-dark");
+    }
+  }
+  const toggleBodyColorPrimary = () => {
+    const bsSheetEl = window.document.querySelector("link#quarto-bootstrap");
+    if (bsSheetEl) {
+      toggleBodyColorMode(bsSheetEl);
+    }
+  }
+  toggleBodyColorPrimary();  
+  const icon = "";
+  const anchorJS = new window.AnchorJS();
+  anchorJS.options = {
+    placement: 'right',
+    icon: icon
+  };
+  anchorJS.add('.anchored');
+  const isCodeAnnotation = (el) => {
+    for (const clz of el.classList) {
+      if (clz.startsWith('code-annotation-')) {                     
+        return true;
+      }
+    }
+    return false;
+  }
+  const clipboard = new window.ClipboardJS('.code-copy-button', {
+    text: function(trigger) {
+      const codeEl = trigger.previousElementSibling.cloneNode(true);
+      for (const childEl of codeEl.children) {
+        if (isCodeAnnotation(childEl)) {
+          childEl.remove();
+        }
+      }
+      return codeEl.innerText;
+    }
+  });
+  clipboard.on('success', function(e) {
+    // button target
+    const button = e.trigger;
+    // don't keep focus
+    button.blur();
+    // flash "checked"
+    button.classList.add('code-copy-button-checked');
+    var currentTitle = button.getAttribute("title");
+    button.setAttribute("title", "Copied!");
+    let tooltip;
+    if (window.bootstrap) {
+      button.setAttribute("data-bs-toggle", "tooltip");
+      button.setAttribute("data-bs-placement", "left");
+      button.setAttribute("data-bs-title", "Copied!");
+      tooltip = new bootstrap.Tooltip(button, 
+        { trigger: "manual", 
+          customClass: "code-copy-button-tooltip",
+          offset: [0, -8]});
+      tooltip.show();    
+    }
+    setTimeout(function() {
+      if (tooltip) {
+        tooltip.hide();
+        button.removeAttribute("data-bs-title");
+        button.removeAttribute("data-bs-toggle");
+        button.removeAttribute("data-bs-placement");
+      }
+      button.setAttribute("title", currentTitle);
+      button.classList.remove('code-copy-button-checked');
+    }, 1000);
+    // clear code selection
+    e.clearSelection();
+  });
+  function tippyHover(el, contentFn) {
+    const config = {
+      allowHTML: true,
+      content: contentFn,
+      maxWidth: 500,
+      delay: 100,
+      arrow: false,
+      appendTo: function(el) {
+          return el.parentElement;
+      },
+      interactive: true,
+      interactiveBorder: 10,
+      theme: 'quarto',
+      placement: 'bottom-start'
+    };
+    window.tippy(el, config); 
+  }
+  const noterefs = window.document.querySelectorAll('a[role="doc-noteref"]');
+  for (var i=0; i<noterefs.length; i++) {
+    const ref = noterefs[i];
+    tippyHover(ref, function() {
+      // use id or data attribute instead here
+      let href = ref.getAttribute('data-footnote-href') || ref.getAttribute('href');
+      try { href = new URL(href).hash; } catch {}
+      const id = href.replace(/^#\/?/, "");
+      const note = window.document.getElementById(id);
+      return note.innerHTML;
+    });
+  }
+      let selectedAnnoteEl;
+      const selectorForAnnotation = ( cell, annotation) => {
+        let cellAttr = 'data-code-cell="' + cell + '"';
+        let lineAttr = 'data-code-annotation="' +  annotation + '"';
+        const selector = 'span[' + cellAttr + '][' + lineAttr + ']';
+        return selector;
+      }
+      const selectCodeLines = (annoteEl) => {
+        const doc = window.document;
+        const targetCell = annoteEl.getAttribute("data-target-cell");
+        const targetAnnotation = annoteEl.getAttribute("data-target-annotation");
+        const annoteSpan = window.document.querySelector(selectorForAnnotation(targetCell, targetAnnotation));
+        const lines = annoteSpan.getAttribute("data-code-lines").split(",");
+        const lineIds = lines.map((line) => {
+          return targetCell + "-" + line;
+        })
+        let top = null;
+        let height = null;
+        let parent = null;
+        if (lineIds.length > 0) {
+            //compute the position of the single el (top and bottom and make a div)
+            const el = window.document.getElementById(lineIds[0]);
+            top = el.offsetTop;
+            height = el.offsetHeight;
+            parent = el.parentElement.parentElement;
+          if (lineIds.length > 1) {
+            const lastEl = window.document.getElementById(lineIds[lineIds.length - 1]);
+            const bottom = lastEl.offsetTop + lastEl.offsetHeight;
+            height = bottom - top;
+          }
+          if (top !== null && height !== null && parent !== null) {
+            // cook up a div (if necessary) and position it 
+            let div = window.document.getElementById("code-annotation-line-highlight");
+            if (div === null) {
+              div = window.document.createElement("div");
+              div.setAttribute("id", "code-annotation-line-highlight");
+              div.style.position = 'absolute';
+              parent.appendChild(div);
+            }
+            div.style.top = top - 2 + "px";
+            div.style.height = height + 4 + "px";
+            let gutterDiv = window.document.getElementById("code-annotation-line-highlight-gutter");
+            if (gutterDiv === null) {
+              gutterDiv = window.document.createElement("div");
+              gutterDiv.setAttribute("id", "code-annotation-line-highlight-gutter");
+              gutterDiv.style.position = 'absolute';
+              const codeCell = window.document.getElementById(targetCell);
+              const gutter = codeCell.querySelector('.code-annotation-gutter');
+              gutter.appendChild(gutterDiv);
+            }
+            gutterDiv.style.top = top - 2 + "px";
+            gutterDiv.style.height = height + 4 + "px";
+          }
+          selectedAnnoteEl = annoteEl;
+        }
+      };
+      const unselectCodeLines = () => {
+        const elementsIds = ["code-annotation-line-highlight", "code-annotation-line-highlight-gutter"];
+        elementsIds.forEach((elId) => {
+          const div = window.document.getElementById(elId);
+          if (div) {
+            div.remove();
+          }
+        });
+        selectedAnnoteEl = undefined;
+      };
+      // Attach click handler to the DT
+      const annoteDls = window.document.querySelectorAll('dt[data-target-cell]');
+      for (const annoteDlNode of annoteDls) {
+        annoteDlNode.addEventListener('click', (event) => {
+          const clickedEl = event.target;
+          if (clickedEl !== selectedAnnoteEl) {
+            unselectCodeLines();
+            const activeEl = window.document.querySelector('dt[data-target-cell].code-annotation-active');
+            if (activeEl) {
+              activeEl.classList.remove('code-annotation-active');
+            }
+            selectCodeLines(clickedEl);
+            clickedEl.classList.add('code-annotation-active');
+          } else {
+            // Unselect the line
+            unselectCodeLines();
+            clickedEl.classList.remove('code-annotation-active');
+          }
+        });
+      }
+  const findCites = (el) => {
+    const parentEl = el.parentElement;
+    if (parentEl) {
+      const cites = parentEl.dataset.cites;
+      if (cites) {
+        return {
+          el,
+          cites: cites.split(' ')
+        };
+      } else {
+        return findCites(el.parentElement)
+      }
+    } else {
+      return undefined;
+    }
+  };
+  var bibliorefs = window.document.querySelectorAll('a[role="doc-biblioref"]');
+  for (var i=0; i<bibliorefs.length; i++) {
+    const ref = bibliorefs[i];
+    const citeInfo = findCites(ref);
+    if (citeInfo) {
+      tippyHover(citeInfo.el, function() {
+        var popup = window.document.createElement('div');
+        citeInfo.cites.forEach(function(cite) {
+          var citeDiv = window.document.createElement('div');
+          citeDiv.classList.add('hanging-indent');
+          citeDiv.classList.add('csl-entry');
+          var biblioDiv = window.document.getElementById('ref-' + cite);
+          if (biblioDiv) {
+            citeDiv.innerHTML = biblioDiv.innerHTML;
+          }
+          popup.appendChild(citeDiv);
+        });
+        return popup.innerHTML;
+      });
+    }
+  }
+});
+</script>
+<nav class="page-navigation">
+  <div class="nav-page nav-page-previous">
+      <a href="./getting-started.html" class="pagination-link">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text">Getting started with Python</span>
+      </a>          
+  </div>
+  <div class="nav-page nav-page-next">
+      <a href="./absorbance.html" class="pagination-link">
+        <span class="nav-page-text">From reflectance to absorbance</span> <i class="bi bi-arrow-right-short"></i>
+      </a>
+  </div>
+</nav>
+</div> <!-- /content -->
+
+
+
+</body></html>
