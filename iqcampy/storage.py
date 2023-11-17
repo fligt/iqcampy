@@ -92,11 +92,16 @@ def filetree(data_path, include_files=True, force_absolute_ids=True, show=True):
         if include_files:
             for f in files:
                 f_id = p_root_id / f
-                tree.create_node(tag=f_id.name, identifier=f_id, parent=p_root_id)
+                tree.create_node(tag=f_id.name, identifier=f_id, parent=p_root_id) 
+
+    # fix treelib.tree.show() bug: 
+    # see: https://stackoverflow.com/questions/46345677/treelib-prints-garbage-instead-of-pseudographics-in-python3 
+
+    tree_str = tree.show(stdout=False)
     if show: 
-        tree.show() 
+        print(tree_str)
     
-    return tree 
+    return None
 
 
 
